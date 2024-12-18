@@ -1,4 +1,4 @@
-package org.example;
+package RepoGreeter;
 
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHRepository;

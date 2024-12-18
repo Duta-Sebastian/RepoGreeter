@@ -1,4 +1,4 @@
-package org.example;
+package RepoGreeter.TokenProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
