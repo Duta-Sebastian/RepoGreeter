@@ -30,12 +30,13 @@ public class MainApp extends Application {
         VBox layout = new VBox();
         layout.setSpacing(10);
 
-        Scene scene = new Scene(layout, 800, 800);
+        Scene scene = new Scene(layout, 400, 400);
         primaryStage.setScene(scene);
 
         Text nameText = new Text();
         ComboBox<GHRepository> repoComboBox = RepositoryComboBoxConfig.createRepositoryComboBox();
         Button pullRequestButton = new Button("Create the pull request");
+        pullRequestButton.setVisible(false);
 
         layout.getChildren().addAll(nameText, repoComboBox, pullRequestButton);
 
@@ -44,24 +45,20 @@ public class MainApp extends Application {
             try {
                 username = gitHubService.getGitHub().getMyself().getLogin();
                 updateUIWithUserName(nameText, username);
-                retrieveAndShowRepositories(gitHubService, repoComboBox);
+                retrieveAndShowRepositories(gitHubService, repoComboBox, pullRequestButton);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
 
         pullRequestButton.setOnAction(_ -> {
-            if (gitRepo == null) {
-                System.out.println("Please select a repo");
-            } else {
+            if (gitRepo != null) {
                 gitHubService.createPullRequest(gitRepo);
             }
         });
 
         repoComboBox.setOnAction(_ -> {
-            GHRepository selectedRepo = repoComboBox.getSelectionModel().getSelectedItem();
-            System.out.println("Selected repo: " + selectedRepo.getName());
-            this.gitRepo = selectedRepo;
+            this.gitRepo = repoComboBox.getSelectionModel().getSelectedItem();
             repoComboBox.hide();
         });
         primaryStage.show();
@@ -72,9 +69,13 @@ public class MainApp extends Application {
         System.out.println("Hello " + userName);
     }
 
-    private void retrieveAndShowRepositories(GithubService gitHubService, ComboBox<GHRepository> repoComboBox) {
+    private void retrieveAndShowRepositories(GithubService gitHubService,
+                                             ComboBox<GHRepository> repoComboBox,
+                                             Button pullRequestButton) {
         gitHubService.getRepositories()
-                .thenAccept(repos -> RepositoryComboBoxConfig
-                        .updateComboBoxItems(repoComboBox, repos));
+                .thenAccept(repos -> {
+                    RepositoryComboBoxConfig.updateComboBoxItems(repoComboBox, repos);
+                    pullRequestButton.setVisible(true);
+                });
     }
 }
